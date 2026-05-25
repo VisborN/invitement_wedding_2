@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Приглашение в Волшебный Лес</title>
+    <!-- Google Fonts: Cormorant Garamond for elegant serifs, Montserrat for clean text -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="index.css">
+    <style>
+        /* FOUC Prevention & Immediate Critical Preloader Styling */
+        .preloader-overlay {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            background-color: #02120b !important;
+            z-index: 9999 !important;
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+            transition: opacity 0.8s ease, visibility 0.8s ease !important;
+        }
+        .preloader-overlay.fade-out {
+            opacity: 0 !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
+        }
+        .preloader-content {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            text-align: center !important;
+        }
+        .preloader-spinner {
+            position: relative !important;
+            width: 80px !important;
+            height: 80px !important;
+            margin-bottom: 25px !important;
+        }
+        .spinner-svg {
+            width: 100% !important;
+            height: 100% !important;
+            animation: spin-critical 1.8s linear infinite !important;
+        }
+        @keyframes spin-critical {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        /* Completely hide forest environment and cards until JS signals ready */
+        .preload-active .forest-bg,
+        .preload-active .forest-container,
+        .preload-active .content-wrapper,
+        .preload-active .music-toggle-btn {
+            opacity: 0 !important;
+            visibility: hidden !important;
+        }
+    </style>
+</head>
+<body data-nav-step="0" class="preload preload-active">
+
+    <!-- Elegant Magical Preloader -->
+    <div id="site-preloader" class="preloader-overlay">
+        <div class="preloader-content">
+            <div class="preloader-spinner">
+                <svg viewBox="0 0 100 100" class="spinner-svg">
+                    <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(212, 175, 55, 0.15)" stroke-width="4"/>
+                    <path d="M50,10 A40,40 0 0,1 90,50" fill="none" stroke="var(--gold-primary)" stroke-width="4" stroke-linecap="round"/>
+                </svg>
+                <div class="preloader-sparkle">✨</div>
+            </div>
+            <h2 class="preloader-title">Волшебный Лес</h2>
+            <p class="preloader-subtitle">Сотворение сказки...</p>
+        </div>
+    </div>
+
+    <!-- Ambient Magical Background Gradient -->
+    <div class="forest-bg"></div>
+
+    <!-- Canvas for Floating Fireflies/Magical Lights -->
+    <canvas id="fireflies-canvas"></canvas>
+
+    <!-- Parallax Forest Layers (Left and Right for parting effect) -->
+    <div class="forest-container" id="forest-container">
+        <!-- Background Tree Layer (Parts slightly) -->
+        <div class="tree-layer bg-layer">
+            <div class="tree-group left-side">
+                <div class="tree-sway-wrapper">
+                    <img src="spruce3.png" class="tree tree-1" alt="tree">
+                    <img src="spruce2.png" class="tree tree-2" alt="tree">
+                    <img src="spruce.png" class="tree tree-3" alt="tree">
+                    <img src="spruce3.png" class="tree tree-4" alt="tree">
+                </div>
+            </div>
+            <div class="tree-group right-side">
+                <div class="tree-sway-wrapper">
+                    <img src="spruce2.png" class="tree tree-1" alt="tree">
+                    <img src="spruce.png" class="tree tree-2" alt="tree">
+                    <img src="spruce3.png" class="tree tree-3" alt="tree">
+                    <img src="spruce2.png" class="tree tree-4" alt="tree">
+                </div>
+            </div>
+        </div>
+
+        <!-- Deep grass layer (Static, sits behind midground trees, above background trees) -->
+        <div class="forest-floor forest-floor-deep">
+            <img src="fern.png" class="ground-plant plant-1" alt="plant">
+            <img src="grass.png" class="ground-plant plant-2" alt="plant">
+            <img src="fern.png" class="ground-plant plant-3" alt="plant">
+            <img src="grass.png" class="ground-plant plant-4" alt="plant">
+            <img src="fern.png" class="ground-plant plant-5" alt="plant">
+            <img src="grass.png" class="ground-plant plant-6" alt="plant">
+        </div>
+
+        <!-- Midground Tree Layer (Parts moderately) -->
+        <div class="tree-layer md-layer">
+            <div class="tree-group left-side">
+                <div class="tree-sway-wrapper">
+                    <img src="spruce2.png" class="tree tree-1" alt="tree">
+                    <img src="spruce3.png" class="tree tree-2" alt="tree">
+                    <img src="spruce.png" class="tree tree-3" alt="tree">
+                </div>
+            </div>
+            <div class="tree-group right-side">
+                <div class="tree-sway-wrapper">
+                    <img src="spruce.png" class="tree tree-1" alt="tree">
+                    <img src="spruce2.png" class="tree tree-2" alt="tree">
+                    <img src="spruce3.png" class="tree tree-3" alt="tree">
+                </div>
+            </div>
+        </div>
+
+        <!-- Mid grass layer (Static, sits behind foreground trees, above midground trees) -->
+        <div class="forest-floor forest-floor-mid">
+            <img src="grass.png" class="ground-plant plant-1" alt="plant">
+            <img src="fern.png" class="ground-plant plant-2" alt="plant">
+            <img src="grass.png" class="ground-plant plant-3" alt="plant">
+            <img src="fern.png" class="ground-plant plant-4" alt="plant">
+            <img src="grass.png" class="ground-plant plant-5" alt="plant">
+            <img src="fern.png" class="ground-plant plant-6" alt="plant">
+        </div>
+
+        <!-- Foreground Tree Layer (Parts fully) -->
+        <div class="tree-layer fg-layer">
+            <div class="tree-group left-side">
+                <div class="tree-sway-wrapper">
+                    <img src="spruce.png" class="tree tree-1" alt="tree">
+                    <img src="spruce2.png" class="tree tree-2" alt="tree">
+                </div>
+            </div>
+            <div class="tree-group right-side">
+                <div class="tree-sway-wrapper">
+                    <img src="spruce3.png" class="tree tree-1" alt="tree">
+                    <img src="spruce.png" class="tree tree-2" alt="tree">
+                </div>
+            </div>
+        </div>
+
+        <!-- Static Forest Floor Grass/Moss Overlays (Sit in front of foreground trees) -->
+        <div class="forest-floor forest-floor-back">
+            <img src="fern.png" class="ground-plant plant-1" alt="plant">
+            <img src="grass.png" class="ground-plant plant-2" alt="plant">
+            <img src="fern.png" class="ground-plant plant-3" alt="plant">
+            <img src="grass.png" class="ground-plant plant-4" alt="plant">
+            <img src="fern.png" class="ground-plant plant-5" alt="plant">
+        </div>
+        <div class="forest-floor forest-floor-front">
+            <img src="grass.png" class="ground-plant plant-1" alt="plant">
+            <img src="fern.png" class="ground-plant plant-2" alt="plant">
+            <img src="grass.png" class="ground-plant plant-3" alt="plant">
+            <img src="fern.png" class="ground-plant plant-4" alt="plant">
+            <img src="grass.png" class="ground-plant plant-5" alt="plant">
+        </div>
+    </div>
+
+    <!-- Content Wrapper (Glassmorphism Cards) -->
+    <main class="content-wrapper" id="content-wrapper">
+        
+        <!-- Welcome Screen (Slide 0) -->
+        <section class="card active" id="slide-welcome" data-step="0">
+            <div class="card-ornament">
+                <svg viewBox="0 0 100 20" class="gold-vine">
+                    <path d="M10,10 Q25,0 50,10 T90,10 M30,5 Q35,15 40,8 M60,15 Q65,5 70,12" fill="none" stroke="var(--gold-primary)" stroke-width="0.8"/>
+                </svg>
+            </div>
+            <h2 class="card-subtitle">Приглашение на свадьбу</h2>
+            <h1 class="card-title main-title">Александр<br><span class="and-symbol">&</span><br>Елизавета</h1>
+            <p class="card-intro">В самом сердце таинственного леса, среди шёпота вековых елей и сияния волшебных огней, родится новая история любви. Мы приглашаем вас разделить этот сказочный день с нами.</p>
+            <button class="btn btn-primary btn-pulse" id="btn-enter">Войти в Волшебный Лес</button>
+        </section>
+
+        <!-- Wedding Date & Venue (Slide 1) -->
+        <section class="card" id="slide-details" data-step="1">
+            <div class="card-ornament">
+                <svg viewBox="0 0 100 20" class="gold-vine">
+                    <path d="M10,10 Q25,0 50,10 T90,10 M30,5 Q35,15 40,8 M60,15 Q65,5 70,12" fill="none" stroke="var(--gold-primary)" stroke-width="0.8"/>
+                </svg>
+            </div>
+            <h2 class="card-subtitle">Когда & Где</h2>
+            <h1 class="card-title">Торжество</h1>
+            
+            <div class="details-grid">
+                <div class="details-item">
+                    <div class="details-icon">✨</div>
+                    <div class="details-label">Дата</div>
+                    <div class="details-value highlight-gold">12 Сентября 2026</div>
+                    <div class="details-sub">Суббота, в 16:00</div>
+                </div>
+                
+                <div class="details-item">
+                    <div class="details-icon">🏰</div>
+                    <div class="details-label">Место</div>
+                    <div class="details-value">Усадьба «Изумрудный Бор»</div>
+                    <div class="details-sub">Лесной проезд, д. 42</div>
+                </div>
+            </div>
+
+            <div class="countdown-container">
+                <div class="countdown-label">До сказки осталось:</div>
+                <div class="countdown-timer" id="countdown">
+                    <div class="time-block"><span id="days">00</span><span class="time-label">дней</span></div>
+                    <div class="time-block"><span id="hours">00</span><span class="time-label">часов</span></div>
+                    <div class="time-block"><span id="minutes">00</span><span class="time-label">минут</span></div>
+                </div>
+            </div>
+
+            <button class="btn btn-secondary" id="btn-to-dresscode">Далее: Дресс-код</button>
+        </section>
+
+        <!-- Dress Code & Palette (Slide 2) -->
+        <section class="card" id="slide-dresscode" data-step="2">
+            <div class="card-ornament">
+                <svg viewBox="0 0 100 20" class="gold-vine">
+                    <path d="M10,10 Q25,0 50,10 T90,10 M30,5 Q35,15 40,8 M60,15 Q65,5 70,12" fill="none" stroke="var(--gold-primary)" stroke-width="0.8"/>
+                </svg>
+            </div>
+            <h2 class="card-subtitle">Стиль праздника</h2>
+            <h1 class="card-title">Дресс-код</h1>
+            <p class="card-text">Мы будем очень рады, если при выборе нарядов вы поддержите цветовую гамму нашей свадьбы. Мы вдохновлялись красками природы таинственного леса — глубокими изумрудными, мягкими шалфейными и золотыми оттенками.</p>
+            
+            <div class="palette-container">
+                <div class="palette-color color-1" style="--color-hex: #022b1c;" data-name="Глубокий Изумруд">
+                    <div class="color-tooltip">Глубокий Изумруд</div>
+                </div>
+                <div class="palette-color color-2" style="--color-hex: #3f5e4d;" data-name="Шалфей">
+                    <div class="color-tooltip">Шалфей</div>
+                </div>
+                <div class="palette-color color-3" style="--color-hex: #8f9779;" data-name="Олива">
+                    <div class="color-tooltip">Олива</div>
+                </div>
+                <div class="palette-color color-4" style="--color-hex: #d4af37;" data-name="Матовое Золото">
+                    <div class="color-tooltip">Матовое Золото</div>
+                </div>
+                <div class="palette-color color-5" style="--color-hex: #ded5c3;" data-name="Тёплый Песок">
+                    <div class="color-tooltip">Тёплый Песок</div>
+                </div>
+            </div>
+
+            <p class="card-subtext">Стиль: Semi-formal / Forest Elegant. Приветствуются струящиеся ткани, натуральные текстуры и золотые украшения.</p>
+            
+            <button class="btn btn-secondary" id="btn-to-rsvp">Далее: Анкета гостя</button>
+        </section>
+
+        <!-- RSVP Form (Slide 3) -->
+        <section class="card" id="slide-rsvp" data-step="3">
+            <div class="card-ornament">
+                <svg viewBox="0 0 100 20" class="gold-vine">
+                    <path d="M10,10 Q25,0 50,10 T90,10 M30,5 Q35,15 40,8 M60,15 Q65,5 70,12" fill="none" stroke="var(--gold-primary)" stroke-width="0.8"/>
+                </svg>
+            </div>
+            <h2 class="card-subtitle">Подтверждение присутствия</h2>
+            <h1 class="card-title">Анкета гостя</h1>
+            <p class="card-text">Пожалуйста, заполните форму ниже до 1 августа 2026 года, чтобы мы могли сделать праздник комфортным для вас.</p>
+            
+            <form class="rsvp-form" id="rsvp-form" onsubmit="return false;">
+                <div class="form-group">
+                    <label for="guest-name" class="form-label">Ваше Имя и Фамилия</label>
+                    <input type="text" id="guest-name" class="form-input" placeholder="Имя Фамилия (или имена гостей)" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Сможете ли вы присутствовать?</label>
+                    <div class="custom-radio-group">
+                        <label class="custom-radio">
+                            <input type="radio" name="attendance" value="yes" checked>
+                            <span class="radio-btn">Да, с удовольствием приду</span>
+                        </label>
+                        <label class="custom-radio">
+                            <input type="radio" name="attendance" value="no">
+                            <span class="radio-btn">К сожалению, не смогу</span>
+                        </label>
+                        <label class="custom-radio">
+                            <input type="radio" name="attendance" value="maybe">
+                            <span class="radio-btn">Пока не знаю, сообщу позже</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group dependent-field">
+                    <label class="form-label">Предпочтения по алкоголю (можно выбрать несколько)</label>
+                    <div class="custom-checkbox-group">
+                        <label class="custom-checkbox">
+                            <input type="checkbox" name="drinks" value="champagne">
+                            <span class="checkbox-btn">Шампанское</span>
+                        </label>
+                        <label class="custom-checkbox">
+                            <input type="checkbox" name="drinks" value="red-wine">
+                            <span class="checkbox-btn">Красное вино</span>
+                        </label>
+                        <label class="custom-checkbox">
+                            <input type="checkbox" name="drinks" value="white-wine">
+                            <span class="checkbox-btn">Белое вино</span>
+                        </label>
+                        <label class="custom-checkbox">
+                            <input type="checkbox" name="drinks" value="strong">
+                            <span class="checkbox-btn">Крепкие напитки</span>
+                        </label>
+                        <label class="custom-checkbox">
+                            <input type="checkbox" name="drinks" value="non-alcoholic">
+                            <span class="checkbox-btn">Безалкогольные напитки</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="food-wishes" class="form-label">Пищевые ограничения или пожелания</label>
+                    <input type="text" id="food-wishes" class="form-input" placeholder="Например: аллергия на орехи, вегетарианец и т.д.">
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="btn-submit-rsvp">Отправить ответ</button>
+            </form>
+        </section>
+
+        <!-- Success Slide (Slide 4) -->
+        <section class="card" id="slide-success" data-step="4">
+            <div class="card-ornament">
+                <svg viewBox="0 0 100 20" class="gold-vine">
+                    <path d="M10,10 Q25,0 50,10 T90,10 M30,5 Q35,15 40,8 M60,15 Q65,5 70,12" fill="none" stroke="var(--gold-primary)" stroke-width="0.8"/>
+                </svg>
+            </div>
+            <div class="success-icon">🌲🦌✨</div>
+            <h1 class="card-title">Спасибо!</h1>
+            <p class="card-text">Ваш ответ успешно получен и сохранен в нашей волшебной книге гостей.</p>
+            <p class="card-intro">С нетерпением ждем встречи с вами в нашем Изумрудном лесу!</p>
+            <button class="btn btn-secondary" id="btn-restart">Вернуться в начало</button>
+        </section>
+
+    </main>
+
+    <!-- Navigation Dots & Back Controls -->
+    <div class="navigation-controls" id="nav-controls">
+        <button class="nav-arrow prev-arrow" id="btn-prev" aria-label="Назад">&larr;</button>
+        <div class="nav-dots" id="nav-dots">
+            <span class="dot active" data-step="0"></span>
+            <span class="dot" data-step="1"></span>
+            <span class="dot" data-step="2"></span>
+            <span class="dot" data-step="3"></span>
+        </div>
+        <button class="nav-arrow next-arrow" id="btn-next" aria-label="Вперед">&rarr;</button>
+    </div>
+
+    <!-- Music Toggle -->
+    <button class="music-toggle-btn" id="music-toggle" aria-label="Музыка">
+        <span class="music-icon">🎵</span>
+        <span class="music-ripple"></span>
+    </button>
+
+
+    <!-- Foreground Canvas for floating fireflies (in front of cards, pointer-events: none) -->
+    <canvas id="fireflies-fg-canvas"></canvas>
+
+    <script src="index.js"></script>
+</body>
+</html>

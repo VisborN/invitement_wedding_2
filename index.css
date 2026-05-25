@@ -1,0 +1,1252 @@
+:root {
+    --bg-emerald-deep: #02120b;
+    --bg-emerald-dark: #031b11;
+    --emerald-primary: #043825;
+    --emerald-light: #065438;
+    --gold-primary: #d4af37;
+    --gold-light: #f3e5ab;
+    --gold-dark: #aa841c;
+    --text-light: #f0f6f3;
+    --text-muted: #a6c0b4;
+    --glass-bg: rgba(2, 22, 14, 0.28);
+    --glass-border: rgba(212, 175, 55, 0.22);
+    --glass-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+    --font-serif: 'Cormorant Garamond', Georgia, serif;
+    --font-sans: 'Montserrat', Helvetica, sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--bg-emerald-deep);
+    color: var(--text-light);
+    font-family: var(--font-sans);
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+    position: relative;
+    user-select: none;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Disable transitions during initial page preloading to prevent jumps */
+.preload,
+.preload * {
+    transition: none !important;
+}
+
+/* Forest Background, Container and Content fade transitions on load */
+.forest-bg,
+.forest-container,
+.content-wrapper,
+.music-toggle-btn {
+    transition: opacity 1.5s cubic-bezier(0.25, 1, 0.4, 1), visibility 1.5s cubic-bezier(0.25, 1, 0.4, 1);
+}
+
+/* Preloader Overlay (Full screen gold & emerald magical cover) */
+.preloader-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: var(--bg-emerald-deep);
+    background: radial-gradient(circle at 50% 50%, var(--bg-emerald-dark) 0%, var(--bg-emerald-deep) 100%);
+    z-index: 9999; /* Higher than all text, canvases, and overlays */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 1.0s cubic-bezier(0.25, 1, 0.4, 1), visibility 1.0s;
+    opacity: 1;
+    visibility: visible;
+}
+
+.preloader-overlay.fade-out {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.preloader-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.preloader-spinner {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    margin-bottom: 25px;
+}
+
+.spinner-svg {
+    width: 100%;
+    height: 100%;
+    animation: spin 1.8s linear infinite;
+}
+
+.preloader-sparkle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.8rem;
+    animation: pulse 1.8s ease-in-out infinite;
+}
+
+.preloader-title {
+    font-family: var(--font-serif);
+    font-size: 2.2rem;
+    font-weight: 300;
+    color: #ffffff;
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+}
+
+.preloader-subtitle {
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+    font-weight: 300;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--gold-primary);
+    animation: pulseText 1.8s ease-in-out infinite alternate;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+    0%, 100% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.5; }
+    50% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+}
+
+@keyframes pulseText {
+    0% { opacity: 0.4; }
+    100% { opacity: 0.95; }
+}
+
+/* Ambient Background Gradient */
+.forest-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 50% 55%, var(--bg-emerald-dark) 0%, var(--bg-emerald-deep) 100%);
+    z-index: 1;
+}
+
+/* Fireflies Canvas */
+#fireflies-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    pointer-events: none;
+}
+
+/* Foreground Fireflies Canvas (sits in front of everything) */
+#fireflies-fg-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9; /* Sits in front of trees, cards, and text! */
+    pointer-events: none; /* Allows mouse interactions to pass through to buttons/forms */
+}
+
+/* Forest Canvas Container & Tree Layers */
+.forest-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 3;
+    pointer-events: none; /* Allows clicks to go through to background card triggers, though we handle click triggers on body/cards too */
+}
+
+.tree-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+
+.tree-group {
+    position: absolute;
+    bottom: 0;
+    height: 100vh;
+    width: 60vw; /* Wide enough for overlap */
+    pointer-events: auto; /* Allow clicking on trees */
+    cursor: pointer;
+}
+
+.tree-group.left-side {
+    left: 0;
+    transform-origin: bottom left;
+    transform: translateX(0);
+    will-change: transform;
+}
+
+.tree-group.right-side {
+    right: 0;
+    transform-origin: bottom right;
+    transform: translateX(0);
+    will-change: transform;
+}
+
+.tree {
+    position: absolute;
+    bottom: -5vh;
+    height: 110vh; /* Exceed screen heights to avoid gaps */
+    width: auto;
+    aspect-ratio: 1 / 1; /* Match square PNG assets to completely prevent layout shifts on load */
+    object-fit: contain;
+    user-select: none;
+    pointer-events: none;
+    will-change: transform;
+}
+
+/* Foreground Trees Specific Layout & Depth */
+.fg-layer .tree-group.left-side .tree-1 {
+    right: -10vw;
+    bottom: -6vh;
+    height: 115vh;
+    filter: brightness(0.68) contrast(1.1) drop-shadow(0 15px 30px rgba(0, 0, 0, 0.7));
+    transform: scaleX(-1);
+    z-index: 2;
+}
+.fg-layer .tree-group.left-side .tree-2 {
+    right: -24vw;
+    bottom: -8vh;
+    height: 122vh;
+    filter: brightness(0.6) contrast(1.15) drop-shadow(0 15px 30px rgba(0, 0, 0, 0.7));
+    z-index: 1;
+}
+.fg-layer .tree-group.right-side .tree-1 {
+    left: -10vw;
+    bottom: -6vh;
+    height: 115vh;
+    filter: brightness(0.68) contrast(1.1) drop-shadow(0 15px 30px rgba(0, 0, 0, 0.7));
+    z-index: 2;
+}
+.fg-layer .tree-group.right-side .tree-2 {
+    left: -24vw;
+    bottom: -8vh;
+    height: 122vh;
+    filter: brightness(0.6) contrast(1.15) drop-shadow(0 15px 30px rgba(0, 0, 0, 0.7));
+    transform: scaleX(-1);
+    z-index: 1;
+}
+
+/* Midground Trees Specific Layout & Depth */
+.md-layer .tree-group.left-side .tree-1 {
+    right: 8vw;
+    bottom: -4vh;
+    height: 96vh;
+    filter: brightness(0.38) contrast(1.05);
+}
+.md-layer .tree-group.left-side .tree-2 {
+    right: -4vw;
+    bottom: -4vh;
+    height: 106vh;
+    filter: brightness(0.32) contrast(1.08);
+    transform: scaleX(-1);
+}
+.md-layer .tree-group.left-side .tree-3 {
+    right: -16vw;
+    bottom: -4vh;
+    height: 102vh;
+    filter: brightness(0.34) contrast(1.05);
+}
+.md-layer .tree-group.right-side .tree-1 {
+    left: 8vw;
+    bottom: -4vh;
+    height: 96vh;
+    filter: brightness(0.38) contrast(1.05) scaleX(-1);
+}
+.md-layer .tree-group.right-side .tree-2 {
+    left: -4vw;
+    bottom: -4vh;
+    height: 106vh;
+    filter: brightness(0.32) contrast(1.08);
+}
+.md-layer .tree-group.right-side .tree-3 {
+    left: -16vw;
+    bottom: -4vh;
+    height: 102vh;
+    filter: brightness(0.34) contrast(1.05) scaleX(-1);
+}
+
+/* Background Trees Specific Layout & Depth */
+.bg-layer .tree-group.left-side .tree-1 {
+    right: 22vw;
+    bottom: -2vh;
+    height: 80vh;
+    filter: brightness(0.24) contrast(1.02);
+    opacity: 0.95;
+}
+.bg-layer .tree-group.left-side .tree-2 {
+    right: 12vw;
+    bottom: -2vh;
+    height: 88vh;
+    filter: brightness(0.2) contrast(1.02);
+    transform: scaleX(-1);
+    opacity: 0.95;
+}
+.bg-layer .tree-group.left-side .tree-3 {
+    right: 0vw;
+    bottom: -2vh;
+    height: 94vh;
+    filter: brightness(0.18) contrast(1.02);
+    opacity: 0.95;
+}
+.bg-layer .tree-group.left-side .tree-4 {
+    right: -12vw;
+    bottom: -2vh;
+    height: 98vh;
+    filter: brightness(0.16) contrast(1.02);
+    transform: scaleX(-1);
+    opacity: 0.95;
+}
+.bg-layer .tree-group.right-side .tree-1 {
+    left: 22vw;
+    bottom: -2vh;
+    height: 80vh;
+    filter: brightness(0.24) contrast(1.02) scaleX(-1);
+    opacity: 0.95;
+}
+.bg-layer .tree-group.right-side .tree-2 {
+    left: 12vw;
+    bottom: -2vh;
+    height: 88vh;
+    filter: brightness(0.2) contrast(1.02);
+    opacity: 0.95;
+}
+.bg-layer .tree-group.right-side .tree-3 {
+    left: 0vw;
+    bottom: -2vh;
+    height: 94vh;
+    filter: brightness(0.18) contrast(1.02) scaleX(-1);
+    opacity: 0.95;
+}
+.bg-layer .tree-group.right-side .tree-4 {
+    left: -12vw;
+    bottom: -2vh;
+    height: 98vh;
+    filter: brightness(0.16) contrast(1.02);
+    opacity: 0.95;
+}
+
+/* Volumetric 3D Forest Floor (Individual Plants Layout) */
+.forest-floor {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100vw;
+    height: 18vh;
+    pointer-events: none;
+}
+
+.ground-plant {
+    position: absolute;
+    bottom: -4vh;
+    height: 15vh;
+    width: auto;
+    object-fit: contain;
+    user-select: none;
+    pointer-events: none;
+    will-change: transform;
+    transform-origin: bottom center;
+}
+
+/* Ground Plants Organic Wind Sway Animations */
+.ground-plant {
+    animation: groundPlantSway 7.2s ease-in-out infinite alternate;
+}
+
+.ground-plant:nth-child(even) {
+    animation: groundPlantSwayAlt 5.6s ease-in-out infinite alternate 0.6s;
+}
+
+@keyframes groundPlantSway {
+    0% { transform: rotate(0deg) skewX(0deg); }
+    100% { transform: rotate(3deg) skewX(1.5deg); }
+}
+
+@keyframes groundPlantSwayAlt {
+    0% { transform: rotate(0deg) skewX(0deg) scaleX(-1); }
+    100% { transform: rotate(-3deg) skewX(-1.5deg) scaleX(-1); } /* Preserve mirror scaleX(-1) */
+}
+
+/* Layer 1: Volumetric deep background layer (under bg trees) */
+.forest-floor-deep { z-index: 2.5; }
+.forest-floor-deep .ground-plant {
+    height: 9vh;
+    bottom: -3vh;
+    filter: brightness(0.12) contrast(1.0) blur(2.5px);
+}
+.forest-floor-deep .plant-1 { left: 4vw; }
+.forest-floor-deep .plant-2 { left: 21vw; }
+.forest-floor-deep .plant-3 { left: 39vw; }
+.forest-floor-deep .plant-4 { left: 56vw; }
+.forest-floor-deep .plant-5 { left: 74vw; }
+.forest-floor-deep .plant-6 { left: 88vw; }
+
+/* Layer 2: Volumetric middle layer (between bg and md trees) */
+.forest-floor-mid { z-index: 3.2; }
+.forest-floor-mid .ground-plant {
+    height: 11.5vh;
+    bottom: -3.8vh;
+    filter: brightness(0.2) contrast(1.05) blur(1.3px);
+}
+.forest-floor-mid .plant-1 { left: 8vw; }
+.forest-floor-mid .plant-2 { left: 27vw; }
+.forest-floor-mid .plant-3 { left: 46vw; }
+.forest-floor-mid .plant-4 { left: 63vw; }
+.forest-floor-mid .plant-5 { left: 79vw; }
+.forest-floor-mid .plant-6 { left: 93vw; }
+
+/* Layer 3: Volumetric back foreground layer (behind fg trees) */
+.forest-floor-back { z-index: 3.7; }
+.forest-floor-back .ground-plant {
+    height: 14.5vh;
+    bottom: -4.5vh;
+    filter: brightness(0.32) contrast(1.1) blur(0.4px);
+}
+.forest-floor-back .plant-1 { left: 13vw; }
+.forest-floor-back .plant-2 { left: 31vw; }
+.forest-floor-back .plant-3 { left: 49vw; }
+.forest-floor-back .plant-4 { left: 67vw; }
+.forest-floor-back .plant-5 { left: 84vw; }
+
+/* Layer 4: Volumetric front foreground layer (in front of all trees) */
+.forest-floor-front { z-index: 3.9; }
+.forest-floor-front .ground-plant {
+    height: 17.5vh;
+    bottom: -5.5vh;
+    filter: brightness(0.5) contrast(1.25) drop-shadow(0 -6px 14px rgba(0, 0, 0, 0.6));
+}
+.forest-floor-front .plant-1 { left: 3vw; }
+.forest-floor-front .plant-2 { left: 24vw; }
+.forest-floor-front .plant-3 { left: 48vw; }
+.forest-floor-front .plant-4 { left: 70vw; }
+.forest-floor-front .plant-5 { left: 88vw; }
+
+/* CSS Parallax Wind Sway Animation on wrappers */
+.tree-sway-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    will-change: transform;
+}
+.tree-group.left-side .tree-sway-wrapper {
+    transform-origin: bottom left;
+}
+.tree-group.right-side .tree-sway-wrapper {
+    transform-origin: bottom right;
+}
+
+/* Foreground trees: slow, wide sway */
+.fg-layer .tree-group.left-side {
+    transition: transform 2.0s cubic-bezier(0.25, 1, 0.4, 1);
+}
+.fg-layer .tree-group.left-side .tree-sway-wrapper {
+    animation: windSwayLeftFG 7.5s ease-in-out infinite alternate;
+}
+.fg-layer .tree-group.right-side {
+    transition: transform 2.0s cubic-bezier(0.25, 1, 0.4, 1);
+}
+.fg-layer .tree-group.right-side .tree-sway-wrapper {
+    animation: windSwayRightFG 7.5s ease-in-out infinite alternate-reverse;
+}
+
+/* Midground trees: medium sway */
+.md-layer .tree-group.left-side {
+    transition: transform 2.2s cubic-bezier(0.25, 1, 0.4, 1);
+}
+.md-layer .tree-group.left-side .tree-sway-wrapper {
+    animation: windSwayLeftMD 5.8s ease-in-out infinite alternate 1.2s;
+}
+.md-layer .tree-group.right-side {
+    transition: transform 2.2s cubic-bezier(0.25, 1, 0.4, 1);
+}
+.md-layer .tree-group.right-side .tree-sway-wrapper {
+    animation: windSwayRightMD 5.8s ease-in-out infinite alternate-reverse 0.5s;
+}
+
+/* Background trees: fast, subtle sway */
+.bg-layer .tree-group.left-side {
+    transition: transform 2.5s cubic-bezier(0.25, 1, 0.4, 1);
+}
+.bg-layer .tree-group.left-side .tree-sway-wrapper {
+    animation: windSwayLeftBG 4.5s ease-in-out infinite alternate 0.3s;
+}
+.bg-layer .tree-group.right-side {
+    transition: transform 2.5s cubic-bezier(0.25, 1, 0.4, 1);
+}
+.bg-layer .tree-group.right-side .tree-sway-wrapper {
+    animation: windSwayRightBG 4.5s ease-in-out infinite alternate-reverse 0.9s;
+}
+
+/* Parallax Wind Sway Keyframes */
+@keyframes windSwayLeftFG {
+    0% { transform: rotate(0deg) skewX(0deg) translateX(0); }
+    100% { transform: rotate(2.4deg) skewX(1.4deg) translateX(24px); }
+}
+@keyframes windSwayRightFG {
+    0% { transform: rotate(0deg) skewX(0deg) translateX(0); }
+    100% { transform: rotate(-2.4deg) skewX(-1.4deg) translateX(-24px); }
+}
+@keyframes windSwayLeftMD {
+    0% { transform: rotate(0deg) skewX(0deg) translateX(0); }
+    100% { transform: rotate(1.6deg) skewX(1.0deg) translateX(16px); }
+}
+@keyframes windSwayRightMD {
+    0% { transform: rotate(0deg) skewX(0deg) translateX(0); }
+    100% { transform: rotate(-1.6deg) skewX(-1.0deg) translateX(-16px); }
+}
+@keyframes windSwayLeftBG {
+    0% { transform: rotate(0deg) skewX(0deg) translateX(0); }
+    100% { transform: rotate(0.8deg) skewX(0.5deg) translateX(8px); }
+}
+@keyframes windSwayRightBG {
+    0% { transform: rotate(0deg) skewX(0deg) translateX(0); }
+    100% { transform: rotate(-0.8deg) skewX(-0.5deg) translateX(-8px); }
+}
+
+/* ========================================================
+   PARALLAX PARTING FOREST STATES
+   Depending on step, we move trees outwards.
+   ======================================================== */
+
+/* State 0: Welcome Screen (Trees fully closed) */
+body[data-nav-step="0"] .fg-layer .tree-group.left-side { transform: translateX(0); }
+body[data-nav-step="0"] .fg-layer .tree-group.right-side { transform: translateX(0); }
+body[data-nav-step="0"] .md-layer .tree-group.left-side { transform: translateX(0); }
+body[data-nav-step="0"] .md-layer .tree-group.right-side { transform: translateX(0); }
+body[data-nav-step="0"] .bg-layer .tree-group.left-side { transform: translateX(0); }
+body[data-nav-step="0"] .bg-layer .tree-group.right-side { transform: translateX(0); }
+
+/* State 1: Wedding Invitation details (Parted slightly) */
+body[data-nav-step="1"] .fg-layer .tree-group.left-side { transform: translateX(-68%); }
+body[data-nav-step="1"] .fg-layer .tree-group.right-side { transform: translateX(68%); }
+body[data-nav-step="1"] .md-layer .tree-group.left-side { transform: translateX(-40%); }
+body[data-nav-step="1"] .md-layer .tree-group.right-side { transform: translateX(40%); }
+body[data-nav-step="1"] .bg-layer .tree-group.left-side { transform: translateX(-15%); }
+body[data-nav-step="1"] .bg-layer .tree-group.right-side { transform: translateX(15%); }
+
+/* State 2: Dress Code (Parted slightly more) */
+body[data-nav-step="2"] .fg-layer .tree-group.left-side { transform: translateX(-78%); }
+body[data-nav-step="2"] .fg-layer .tree-group.right-side { transform: translateX(78%); }
+body[data-nav-step="2"] .md-layer .tree-group.left-side { transform: translateX(-50%); }
+body[data-nav-step="2"] .md-layer .tree-group.right-side { transform: translateX(50%); }
+body[data-nav-step="2"] .bg-layer .tree-group.left-side { transform: translateX(-24%); }
+body[data-nav-step="2"] .bg-layer .tree-group.right-side { transform: translateX(24%); }
+
+/* State 3: RSVP Form / Success (Parted even more, but keeping trees fully visible at the sides) */
+body[data-nav-step="3"] .fg-layer .tree-group.left-side,
+body[data-nav-step="4"] .fg-layer .tree-group.left-side { transform: translateX(-88%); }
+body[data-nav-step="3"] .fg-layer .tree-group.right-side,
+body[data-nav-step="4"] .fg-layer .tree-group.right-side { transform: translateX(88%); }
+
+body[data-nav-step="3"] .md-layer .tree-group.left-side,
+body[data-nav-step="4"] .md-layer .tree-group.left-side { transform: translateX(-60%); }
+body[data-nav-step="3"] .md-layer .tree-group.right-side,
+body[data-nav-step="4"] .md-layer .tree-group.right-side { transform: translateX(60%); }
+
+body[data-nav-step="3"] .bg-layer .tree-group.left-side,
+body[data-nav-step="4"] .bg-layer .tree-group.left-side { transform: translateX(-34%); }
+body[data-nav-step="3"] .bg-layer .tree-group.right-side,
+body[data-nav-step="4"] .bg-layer .tree-group.right-side { transform: translateX(34%); }
+
+/* ========================================================
+   CONTENT CARDS SYSTEM (Glassmorphism + Elegant Typography)
+   ======================================================== */
+.content-wrapper {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 500px;
+    height: auto;
+    max-height: 85vh;
+    z-index: 4;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none; /* Keeps cards container clear so user can click forest directly, but card kids should enable pointer events */
+}
+
+.card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(10px) saturate(110%);
+    -webkit-backdrop-filter: blur(10px) saturate(110%);
+    box-shadow: var(--glass-shadow);
+    border-radius: 16px;
+    padding: 40px 30px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    opacity: 0;
+    transform: scale(0.92) translateY(20px);
+    pointer-events: none;
+    transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.25, 1, 0.4, 1), visibility 0.8s;
+    visibility: hidden;
+    position: absolute;
+    overflow-y: auto;
+    max-height: 82vh;
+}
+
+/* Custom Scrollbar for scrollable cards on smaller heights */
+.card::-webkit-scrollbar {
+    width: 5px;
+}
+.card::-webkit-scrollbar-track {
+    background: transparent;
+}
+.card::-webkit-scrollbar-thumb {
+    background: rgba(212, 175, 55, 0.2);
+    border-radius: 10px;
+}
+.card::-webkit-scrollbar-thumb:hover {
+    background: rgba(212, 175, 55, 0.5);
+}
+
+.card.active {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    pointer-events: auto;
+    visibility: visible;
+    position: relative;
+    z-index: 5;
+}
+
+/* Card Decorative Ornament */
+.card-ornament {
+    width: 120px;
+    margin-bottom: 15px;
+    opacity: 0.85;
+}
+.gold-vine {
+    width: 100%;
+    height: auto;
+}
+
+.card-subtitle {
+    font-family: var(--font-serif);
+    font-size: 1.25rem;
+    font-weight: 400;
+    color: var(--gold-light);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+}
+
+.card-title {
+    font-family: var(--font-serif);
+    font-size: 2.8rem;
+    font-weight: 600;
+    line-height: 1.15;
+    color: #ffffff;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+    margin-bottom: 25px;
+    letter-spacing: 0.02em;
+}
+
+.card-title.main-title {
+    font-size: 3.5rem;
+    font-weight: 300;
+}
+
+.and-symbol {
+    font-family: var(--font-serif);
+    font-style: italic;
+    color: var(--gold-primary);
+    font-size: 2.2rem;
+    display: inline-block;
+    margin: 5px 0;
+    position: relative;
+}
+
+.card-intro {
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: var(--text-light);
+    max-width: 460px;
+    margin-bottom: 30px;
+    font-weight: 300;
+    letter-spacing: 0.01em;
+}
+
+.card-text {
+    font-size: 0.92rem;
+    line-height: 1.65;
+    color: var(--text-light);
+    margin-bottom: 25px;
+    font-weight: 300;
+}
+
+.card-subtext {
+    font-size: 0.85rem;
+    font-style: italic;
+    color: var(--text-muted);
+    margin-bottom: 25px;
+}
+
+/* ========================================================
+   DETAILS AND GRID STYLING
+   ======================================================== */
+.details-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+    width: 100%;
+    max-width: 440px;
+    margin-bottom: 30px;
+}
+
+.details-item {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    padding: 16px;
+    transition: background 0.3s, transform 0.3s;
+}
+
+.details-item:hover {
+    background: rgba(255, 255, 255, 0.06);
+    transform: translateY(-2px);
+    border-color: rgba(212, 175, 55, 0.15);
+}
+
+.details-icon {
+    font-size: 1.6rem;
+    margin-bottom: 6px;
+}
+
+.details-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+}
+
+.details-value {
+    font-family: var(--font-serif);
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 4px;
+}
+
+.details-value.highlight-gold {
+    color: var(--gold-light);
+    text-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
+}
+
+.details-sub {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    font-weight: 300;
+}
+
+/* Countdown */
+.countdown-container {
+    margin-top: 10px;
+    margin-bottom: 30px;
+    width: 100%;
+}
+
+.countdown-label {
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+}
+
+.countdown-timer {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.time-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 60px;
+    background: rgba(212, 175, 55, 0.06);
+    border: 1px solid rgba(212, 175, 55, 0.12);
+    border-radius: 8px;
+    padding: 8px 4px;
+}
+
+.time-block span {
+    font-family: var(--font-serif);
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: var(--gold-light);
+}
+
+.time-block .time-label {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 2px;
+}
+
+/* ========================================================
+   DRESS CODE & PALETTE STYLING
+   ======================================================== */
+.palette-container {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin: 25px 0;
+    flex-wrap: wrap;
+}
+
+.palette-color {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: var(--color-hex);
+    border: 2px solid rgba(255, 255, 255, 0.7);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.2);
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s;
+}
+
+.palette-color:hover {
+    transform: scale(1.18);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5), 0 0 12px var(--color-hex);
+    z-index: 10;
+}
+
+.color-tooltip {
+    position: absolute;
+    bottom: 120%;
+    left: 50%;
+    transform: translateX(-50%) translateY(8px);
+    background: #02120b;
+    border: 1px solid var(--gold-primary);
+    color: var(--text-light);
+    font-size: 0.7rem;
+    padding: 4px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s, transform 0.3s;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+.palette-color:hover .color-tooltip {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* ========================================================
+   FORM AND INPUT STYLING (Premium RSVP)
+   ======================================================== */
+.rsvp-form {
+    width: 100%;
+    max-width: 440px;
+    text-align: left;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+}
+
+.form-input {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-family: var(--font-sans);
+    font-size: 0.9rem;
+    color: #ffffff;
+    transition: border-color 0.3s, box-shadow 0.3s, background-color 0.3s;
+}
+
+.form-input:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--gold-primary);
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.15);
+}
+
+/* Radio buttons styled as premium tags */
+.custom-radio-group, .custom-checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+}
+
+.custom-checkbox-group {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+}
+
+@media (min-width: 480px) {
+    .custom-checkbox-group {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.custom-radio, .custom-checkbox {
+    cursor: pointer;
+    position: relative;
+    width: 100%;
+}
+
+.custom-radio input, .custom-checkbox input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.radio-btn, .checkbox-btn {
+    display: block;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 0.82rem;
+    color: var(--text-light);
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.custom-radio:hover .radio-btn, .custom-checkbox:hover .checkbox-btn {
+    background: rgba(255, 255, 255, 0.07);
+    border-color: rgba(212, 175, 55, 0.25);
+}
+
+.custom-radio input:checked + .radio-btn, 
+.custom-checkbox input:checked + .checkbox-btn {
+    background: rgba(212, 175, 55, 0.12);
+    border-color: var(--gold-primary);
+    box-shadow: 0 0 12px rgba(212, 175, 55, 0.2);
+    color: var(--gold-light);
+    font-weight: 500;
+}
+
+/* Success panel specifics */
+.success-icon {
+    font-size: 3.5rem;
+    margin-bottom: 15px;
+    animation: floatingIcon 4s ease-in-out infinite alternate;
+}
+
+@keyframes floatingIcon {
+    0% { transform: translateY(0) rotate(0deg); }
+    100% { transform: translateY(-8px) rotate(2deg); }
+}
+
+/* ========================================================
+   BUTTONS STYLING
+   ======================================================== */
+.btn {
+    font-family: var(--font-sans);
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    padding: 14px 32px;
+    border-radius: 30px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    margin-top: 10px;
+    text-decoration: none;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--gold-primary) 0%, var(--gold-dark) 100%);
+    color: #02120b;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold-primary) 100%);
+    box-shadow: 0 6px 20px rgba(212, 175, 55, 0.35), 0 0 15px rgba(212, 175, 55, 0.2);
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-light);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: var(--gold-primary);
+    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.15);
+    color: var(--gold-light);
+    transform: translateY(-2px);
+}
+
+/* Pulsing highlight effect */
+.btn-pulse {
+    position: relative;
+    animation: buttonPulse 2s infinite alternate;
+}
+
+@keyframes buttonPulse {
+    0% { box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2); }
+    100% { box-shadow: 0 4px 22px rgba(212, 175, 55, 0.5), 0 0 10px rgba(212, 175, 55, 0.3); }
+}
+
+/* ========================================================
+   NAVIGATION & UTILITIES
+   ======================================================== */
+.navigation-controls {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.8s, visibility 0.8s;
+}
+
+.navigation-controls.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.nav-arrow {
+    background: none;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--text-muted);
+    font-size: 1.2rem;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s;
+}
+
+.nav-arrow:hover {
+    border-color: var(--gold-primary);
+    color: var(--gold-light);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.nav-dots {
+    display: flex;
+    gap: 12px;
+}
+
+.dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    cursor: pointer;
+    transition: all 0.4s;
+}
+
+.dot.active {
+    background: var(--gold-primary);
+    box-shadow: 0 0 8px var(--gold-primary);
+    transform: scale(1.35);
+}
+
+/* Music Control button */
+.music-toggle-btn {
+    position: absolute;
+    top: 25px;
+    right: 25px;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    cursor: pointer;
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: var(--glass-shadow);
+    transition: all 0.3s;
+}
+
+.music-toggle-btn:hover {
+    border-color: var(--gold-primary);
+    transform: scale(1.08);
+}
+
+.music-icon {
+    font-size: 1.1rem;
+    opacity: 0.7;
+    transition: opacity 0.3s;
+}
+
+.music-toggle-btn.playing .music-icon {
+    opacity: 1;
+    animation: musicWiggle 1s ease-in-out infinite alternate;
+}
+
+.music-ripple {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 50%;
+    border: 1px solid var(--gold-primary);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.music-toggle-btn.playing .music-ripple {
+    animation: ripple 2s linear infinite;
+}
+
+@keyframes musicWiggle {
+    0% { transform: rotate(-5deg); }
+    100% { transform: rotate(10deg); }
+}
+
+@keyframes ripple {
+    0% { transform: scale(1); opacity: 0.5; }
+    100% { transform: scale(1.6); opacity: 0; }
+}
+
+/* ========================================================
+   RESPONSIVE DESIGN MEDIA QUERIES
+   ======================================================== */
+@media (max-width: 768px) {
+    .card-title {
+        font-size: 2.2rem;
+        margin-bottom: 18px;
+    }
+    
+    .card-title.main-title {
+        font-size: 2.8rem;
+    }
+
+    .and-symbol {
+        font-size: 1.8rem;
+    }
+
+    .card {
+        padding: 30px 20px;
+        max-height: 75vh;
+    }
+
+    .details-value {
+        font-size: 1.3rem;
+    }
+
+    .time-block {
+        min-width: 50px;
+        padding: 6px 2px;
+    }
+
+    .time-block span {
+        font-size: 1.4rem;
+    }
+
+    /* Adjust tree overlap translations on small screens so they clear cards beautifully */
+    body[data-nav-step="1"] .fg-layer .tree-group.left-side { transform: translateX(-92%); }
+    body[data-nav-step="1"] .fg-layer .tree-group.right-side { transform: translateX(92%); }
+    body[data-nav-step="1"] .md-layer .tree-group.left-side { transform: translateX(-68%); }
+    body[data-nav-step="1"] .md-layer .tree-group.right-side { transform: translateX(68%); }
+
+    body[data-nav-step="2"] .fg-layer .tree-group.left-side { transform: translateX(-96%); }
+    body[data-nav-step="2"] .fg-layer .tree-group.right-side { transform: translateX(96%); }
+}
+
+@media (max-height: 600px) {
+    .card {
+        padding: 15px 20px;
+    }
+    .card-title {
+        font-size: 1.8rem;
+        margin-bottom: 10px;
+    }
+    .card-title.main-title {
+        font-size: 2rem;
+    }
+    .card-subtitle {
+        font-size: 1rem;
+        margin-bottom: 4px;
+    }
+    .details-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+    .details-item {
+        padding: 8px;
+    }
+    .countdown-container {
+        margin-bottom: 10px;
+    }
+    .palette-container {
+        margin: 10px 0;
+    }
+    .palette-color {
+        width: 35px;
+        height: 35px;
+    }
+    .btn {
+        padding: 10px 20px;
+    }
+}
