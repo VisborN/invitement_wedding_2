@@ -340,7 +340,7 @@
     // ========================================================
     // 5. COUNTDOWN TIMER
     // ========================================================
-    const weddingDate = new Date('September 12, 2026 16:00:00').getTime();
+    const weddingDate = new Date('August 2, 2026 17:00:00').getTime();
 
     function updateCountdown() {
         const now = new Date().getTime();
