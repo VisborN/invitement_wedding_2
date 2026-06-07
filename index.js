@@ -160,13 +160,22 @@
         mouse.y = null;
     });
 
-    // Support touch devices for firefly repulsion
+    // Support touch devices for firefly repulsion & block pinch zoom
+    window.addEventListener('touchstart', (e) => {
+        if (e.touches.length > 1) {
+            e.preventDefault(); // Prevent multi-touch pinch zoom
+        }
+    }, { passive: false });
+
     window.addEventListener('touchmove', (e) => {
+        if (e.touches.length > 1) {
+            e.preventDefault(); // Prevent multi-touch pinch zoom
+        }
         if (e.touches.length > 0) {
             mouse.x = e.touches[0].clientX;
             mouse.y = e.touches[0].clientY;
         }
-    });
+    }, { passive: false });
 
     window.addEventListener('touchend', () => {
         mouse.x = null;

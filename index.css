@@ -35,6 +35,7 @@ body {
     -webkit-touch-callout: none;
     -webkit-tap-highlight-color: transparent;
     overscroll-behavior-y: none;
+    touch-action: none;
     -webkit-font-smoothing: antialiased;
 }
 
@@ -628,6 +629,7 @@ body[data-nav-step="4"] .bg-layer .tree-group.right-side { transform: translateX
     max-height: 82vh;
     max-height: 82dvh;
     overscroll-behavior-y: contain;
+    touch-action: pan-y;
 }
 
 /* Custom Scrollbar for scrollable cards on smaller heights */
