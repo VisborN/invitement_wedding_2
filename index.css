@@ -1078,7 +1078,7 @@ body[data-nav-step="4"] .bg-layer .tree-group.right-side { transform: translateX
 }
 
 .nav-arrow {
-    background: none;
+    background: transparent;
     border: 1px solid rgba(255, 255, 255, 0.2);
     color: var(--text-muted);
     font-size: 1.2rem;
@@ -1090,6 +1090,13 @@ body[data-nav-step="4"] .bg-layer .tree-group.right-side { transform: translateX
     justify-content: center;
     align-items: center;
     transition: all 0.3s;
+    appearance: none;
+    -webkit-appearance: none;
+    padding: 0;
+    margin: 0;
+    outline: none;
+    line-height: 1;
+    font-family: inherit;
 }
 
 .nav-arrow:hover {
@@ -1110,6 +1117,10 @@ body[data-nav-step="4"] .bg-layer .tree-group.right-side { transform: translateX
     background: rgba(255, 255, 255, 0.2);
     cursor: pointer;
     transition: all 0.4s;
+    display: block;
+    flex-shrink: 0;
+    padding: 0;
+    margin: 0;
 }
 
 .dot.active {
