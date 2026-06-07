@@ -835,11 +835,11 @@ body[data-nav-step="4"] .bg-layer .tree-group.right-side { transform: translateX
    DRESS CODE & PALETTE STYLING
    ======================================================== */
 .palette-container {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(4, max-content);
     justify-content: center;
     gap: 15px;
     margin: 25px 0;
-    flex-wrap: wrap;
 }
 
 .palette-color {

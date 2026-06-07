@@ -289,30 +289,59 @@
     rsvpForm.addEventListener('submit', (e) => {
         e.preventDefault();
 
-        // Get filled RSVP data for realistic submission experience
+        // Get filled RSVP data
         const name = document.getElementById('guest-name').value;
         const attendance = document.querySelector('input[name="attendance"]:checked').value;
         
-        const selectedDrinks = [];
-        document.querySelectorAll('input[name="drinks"]:checked').forEach(cb => {
-            selectedDrinks.push(cb.value);
+        const selectedEat = [];
+        document.querySelectorAll('input[name="eat"]:checked').forEach(cb => {
+            // cb.nextElementSibling is the .checkbox-btn span
+            selectedEat.push(cb.nextElementSibling.textContent.trim());
         });
         
         const foodWishes = document.getElementById('food-wishes').value;
+        const drinkWishes = document.getElementById('drink-wishes').value;
 
-        const responseData = {
-            guestName: name,
-            willAttend: attendance,
-            drinks: selectedDrinks,
-            dietaryRestrictions: foodWishes,
-            timestamp: new Date().toISOString()
-        };
+        const submitBtn = document.getElementById('btn-submit-rsvp');
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = 'Отправка...';
+        submitBtn.style.opacity = '0.7';
+        submitBtn.style.pointerEvents = 'none';
 
-        // Simulate saving data to mock storage
-        localStorage.setItem('wedding_rsvp_response', JSON.stringify(responseData));
+        // Translate attendance value to Russian
+        let attendanceText = '';
+        if (attendance === 'yes') attendanceText = 'Да, приду';
+        else if (attendance === 'no') attendanceText = 'К сожалению, не смогу';
+        else attendanceText = 'Пока не знаю';
 
-        // Display smooth success transition
-        navigateToStep(4);
+        const formData = new URLSearchParams();
+        formData.append('name', name);
+        formData.append('attendance', attendanceText);
+        formData.append('eat', selectedEat.join(', '));
+        formData.append('foodWishes', foodWishes);
+        formData.append('drinkWishes', drinkWishes);
+
+        // Send data to Google Apps Script Web App
+        fetch('https://script.google.com/macros/s/AKfycbwgSyWMZZSiGc5wRZc7Cdkdm0NJzV8iasFONos8ZenuB5pRM3iEBMC3v6icbiGzSGbvuw/exec', {
+            method: 'POST',
+            body: formData,
+            mode: 'no-cors' // Crucial for Google Apps Script to bypass CORS preflight
+        }).then(() => {
+            // Successfully sent
+            navigateToStep(4);
+            
+            // Restore button state
+            submitBtn.textContent = originalText;
+            submitBtn.style.opacity = '1';
+            submitBtn.style.pointerEvents = 'auto';
+        }).catch(error => {
+            console.error('Submission failed:', error);
+            alert('Произошла ошибка при отправке анкеты. Пожалуйста, попробуйте еще раз.');
+            
+            submitBtn.textContent = originalText;
+            submitBtn.style.opacity = '1';
+            submitBtn.style.pointerEvents = 'auto';
+        });
     });
 
     // Toggle dependent alcohol fields based on attendance choice (if they say "No", clear alcohol/food needs)
